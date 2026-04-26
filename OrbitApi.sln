@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrbitApi", "api\OrbitApi.csproj", "{BA13FF17-F896-4192-9425-62F254B7283C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{15930E78-26DF-451B-BBF2-6AC3402E2FE7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrbitApi.UnitTests", "tests\OrbitApi.UnitTests\OrbitApi.UnitTests.csproj", "{19ABCACB-A959-450E-BEF6-832FBE996224}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrbitApi.IntegrationTests", "tests\OrbitApi.IntegrationTests\OrbitApi.IntegrationTests.csproj", "{C1F45B7A-5BB7-4BD8-A5CF-DF3C999A8F31}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA13FF17-F896-4192-9425-62F254B7283C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA13FF17-F896-4192-9425-62F254B7283C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA13FF17-F896-4192-9425-62F254B7283C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA13FF17-F896-4192-9425-62F254B7283C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19ABCACB-A959-450E-BEF6-832FBE996224}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19ABCACB-A959-450E-BEF6-832FBE996224}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19ABCACB-A959-450E-BEF6-832FBE996224}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19ABCACB-A959-450E-BEF6-832FBE996224}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1F45B7A-5BB7-4BD8-A5CF-DF3C999A8F31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1F45B7A-5BB7-4BD8-A5CF-DF3C999A8F31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1F45B7A-5BB7-4BD8-A5CF-DF3C999A8F31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1F45B7A-5BB7-4BD8-A5CF-DF3C999A8F31}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{19ABCACB-A959-450E-BEF6-832FBE996224} = {15930E78-26DF-451B-BBF2-6AC3402E2FE7}
+		{C1F45B7A-5BB7-4BD8-A5CF-DF3C999A8F31} = {15930E78-26DF-451B-BBF2-6AC3402E2FE7}
+	EndGlobalSection
+EndGlobal

@@ -13,6 +13,12 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod()));
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new() { Title = "Orbit API", Version = "v1" });
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -21,8 +27,16 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.UseCors();
 app.UseHttpsRedirection();
 app.MapProjectEndpoints();
 
 app.Run();
+
+public partial class Program;
