@@ -36,6 +36,10 @@ orbit/
 │   ├── src/
 │   ├── package.json
 │   └── vite.config.js
+├── bruno/                        # Cliente HTTP (Bruno) — requests versionadas
+│   ├── bruno.json
+│   ├── environments/Local.bru
+│   └── Projects/                 # CRUD de Projects
 └── tests/
     ├── OrbitApi.UnitTests/       # 8 testes — handlers isolados
     └── OrbitApi.IntegrationTests/# 3 testes — pipeline HTTP completo
@@ -64,6 +68,88 @@ npm run dev
 dotnet test OrbitApi.sln
 ```
 Roda os 11 testes (unit + integration) na solução inteira.
+
+### Cliente HTTP (Bruno)
+Abrir a pasta `bruno/` no app do [Bruno](https://www.usebruno.com/), selecionar o environment **Local** e disparar os requests da pasta `Projects/`. Requer a API rodando em `http://localhost:5121`. Detalhes na seção [Cliente HTTP (Bruno)](#cliente-http-bruno-1).
+
+---
+
+## Cliente HTTP (Bruno)
+
+[Bruno](https://www.usebruno.com/) é um cliente HTTP estilo Postman/Insomnia, mas que armazena cada request como **arquivo texto (`.bru`)** no filesystem. Isso permite versionar a collection junto ao código, ter diff legível em PRs e evitar dependência de cloud/login.
+
+### Instalação
+- App desktop: [usebruno.com/downloads](https://www.usebruno.com/downloads) (Windows, macOS, Linux).
+- CLI (opcional, para rodar a collection sem GUI): `npm install -g @usebruno/cli`.
+
+### Abrir a collection
+1. Abrir o app do Bruno.
+2. **Open Collection** → apontar para a pasta `bruno/` deste repositório.
+3. No canto superior direito, selecionar o environment **Local**.
+4. Garantir que a API esteja rodando (`cd api && dotnet run`).
+5. Disparar qualquer request da pasta `Projects/`.
+
+### Estrutura da collection
+```
+bruno/
+├── bruno.json              # metadata (nome, versão, tipo)
+├── .gitignore              # ignora .env e *.local.bru
+├── environments/
+│   └── Local.bru           # baseUrl = http://localhost:5121
+└── Projects/               # uma pasta por recurso/agrupamento
+    ├── List Projects.bru       (seq: 1)
+    ├── Get Project By Id.bru   (seq: 2)
+    ├── Create Project.bru      (seq: 3)
+    ├── Update Project.bru      (seq: 4)
+    └── Delete Project.bru      (seq: 5)
+```
+
+### Convenções
+- **Uma pasta por recurso** (`Projects/`, `Users/`, ...). Espelha o agrupamento de endpoints do backend (`MapGroup("/api/projects")`).
+- **Um arquivo `.bru` por request**, nomeado em inglês com case natural (`Create Project.bru`).
+- **`seq:` numera a ordem na UI**, normalmente `List → GetById → Create → Update → Delete`.
+- **`baseUrl` sempre via environment**, nunca hardcoded — facilita apontar para outro ambiente sem editar requests.
+- **Path params** declarados em `params:path { id: 1 }` e referenciados como `:id` na URL.
+
+### Adicionar um novo request
+Pelo app: clicar com botão direito na pasta → **New Request**. O Bruno gera o `.bru` automaticamente.
+
+Manualmente (formato resumido):
+```
+meta {
+  name: <Nome do request>
+  type: http
+  seq: <número de ordem na pasta>
+}
+
+get {
+  url: {{baseUrl}}/api/<rota>
+  body: none
+  auth: none
+}
+```
+Para POST/PUT, trocar `get` por `post`/`put`, mudar `body: none` para `body: json` e adicionar bloco `body:json { ... }`.
+
+### Adicionar um novo environment
+Criar um arquivo em `bruno/environments/` (ex.: `Staging.bru`):
+```
+vars {
+  baseUrl: https://staging.example.com
+}
+```
+O environment fica selecionável no dropdown da UI.
+
+### Variáveis e segredos
+- **Variáveis públicas** vão direto no `.bru` do environment (`baseUrl`, ids comuns, etc.) e são versionadas.
+- **Segredos** (tokens, API keys, senhas) vão em `bruno/.env` (já no `.gitignore`) no formato `KEY=value` e são referenciados nos requests como `{{process.env.KEY}}`. Nunca colocar segredos diretamente no `.bru`.
+
+Hoje o projeto não tem auth; quando aparecer (ex.: JWT), bastará criar `bruno/.env` com `JWT_TOKEN=...` e adicionar `Authorization: Bearer {{process.env.JWT_TOKEN}}` nos requests que precisarem.
+
+### Rodar a collection inteira pela CLI
+```bash
+bru run --env Local
+```
+Executa todos os requests em ordem (`seq:`) e retorna exit code != 0 se algum falhar. Útil para smoke test pós-deploy — registrado também em [O que ficou para depois](#smoke-tests-com-bru-cli).
 
 ---
 
@@ -95,6 +181,9 @@ Patterns ficam co-localizados com o código que os gera. Evita um arquivo gigant
 - **Unit tests** (`tests/OrbitApi.UnitTests`): testam os handlers diretamente, com `AppDbContext` usando o provedor `InMemory`. Rápidos, isolam regras de negócio e CRUD.
 - **Integration tests** (`tests/OrbitApi.IntegrationTests`): sobem a aplicação real via `WebApplicationFactory<Program>`, sobrescrevem o `DbContext` para usar SQLite in-memory (mais fiel que o provedor `InMemory`) e exercitam o pipeline HTTP completo — CORS, serialização JSON, status codes, roteamento.
 
+### Cliente HTTP versionado (Bruno)
+Os requests para validação manual da API ficam em `bruno/`, no formato `.bru` (texto plano) — diff legível em PR e versionamento natural junto ao código. Cada request é um arquivo, environments ficam em `bruno/environments/`. Segredos eventuais devem ir em `bruno/.env` (ignorado pelo git) e ser referenciados como `{{process.env.X}}`.
+
 ---
 
 ## O que ficou para depois
@@ -118,8 +207,8 @@ A migração é incremental: instalar `typescript`, gerar `tsconfig.json`, e ren
 ### EF Core Migrations
 Substituir `db.Database.EnsureCreated()` por migrations geradas com `dotnet ef migrations add <Nome>`. Necessário a partir do momento em que o modelo `Project` (ou novas entidades) começar a sofrer alterações de schema — `EnsureCreated` só cria do zero, não evolui.
 
+### Smoke tests com `bru` CLI
+A collection do Bruno pode ser executada inteira pelo CLI (`npm install -g @usebruno/cli` → `bru run --env Local`), retornando exit code != 0 se algum request falhar. Encaixa bem como **smoke test pós-deploy** dentro do CI futuro: complementa os testes de integração do xUnit (que rodam in-process) validando o pipeline real (servidor levantado, porta correta, CORS).
+
 ### Vertical Slices (apenas se necessário)
 Se `ProjectEndpoints.cs` virar uma parede de centenas de linhas, quebrar em arquivos por feature: `Features/Projects/Create.cs`, `List.cs`, `Update.cs`, etc. Mantém Minimal API e evita arquivos gigantes. **Não fazer prematuramente** — só quando o arquivo realmente atrapalhar.
-
-### Limpeza pendente
-- `api/Properties/launchSettings.json` ainda aponta `launchUrl: "weatherforecast"` (resíduo do template `dotnet new webapi`). Trocar para `"swagger"` para que `dotnet run` abra direto na UI do Swagger.
