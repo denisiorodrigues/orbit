@@ -1,0 +1,22 @@
+meta {
+  name: Create Project
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/projects
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "Orbit",
+    "description": "Personal projects manager",
+    "status": "active",
+    "repoUrl": "https://github.com/example/orbit",
+    "liveUrl": null,
+    "technologies": "ASP.NET Core, React, Vite"
+  }
+}

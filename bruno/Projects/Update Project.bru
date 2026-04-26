@@ -1,0 +1,26 @@
+meta {
+  name: Update Project
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/projects/:id
+  body: json
+  auth: none
+}
+
+params:path {
+  id: 1
+}
+
+body:json {
+  {
+    "name": "Orbit (renamed)",
+    "description": "Personal projects manager",
+    "status": "in-progress",
+    "repoUrl": "https://github.com/example/orbit",
+    "liveUrl": null,
+    "technologies": "ASP.NET Core, React, Vite, Tailwind"
+  }
+}
