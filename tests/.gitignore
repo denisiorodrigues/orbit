@@ -1,0 +1,15 @@
+# .NET build artifacts (cobre todos os projetos de teste)
+[Bb]in/
+[Oo]bj/
+
+# Test results / coverage
+[Tt]est[Rr]esult*/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+
+# User-specific
+*.user
+*.suo
