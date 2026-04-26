@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OrbitApi.UnitTests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b7c9bdbef08e4aced8b70aff6a782362c9e39a74")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7358b2fe2f0c05e84054f685724065e7d70ff794")]
 [assembly: System.Reflection.AssemblyProductAttribute("OrbitApi.UnitTests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OrbitApi.UnitTests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
