@@ -1,6 +1,0 @@
-# Bruno secrets (loaded via {{process.env.X}})
-.env
-.env.local
-
-# Local-only request overrides
-*.local.bru

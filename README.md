@@ -61,7 +61,8 @@ cd web
 npm install
 npm run dev
 ```
-- Dev server: `http://localhost:5173` (já liberado no CORS do backend)
+- Dev server: `http://localhost:5173` (já liberado no CORS do backend).
+- A URL da API é lida de `VITE_API_URL`. O default de desenvolvimento (`http://localhost:5121/api`) está em `web/.env.development` (versionado). Para sobrescrever localmente sem mexer no arquivo versionado, criar `web/.env.local` com o valor desejado — esse arquivo é ignorado pelo git.
 
 ### Testes
 ```bash
@@ -153,6 +154,53 @@ Executa todos os requests em ordem (`seq:`) e retorna exit code != 0 se algum fa
 
 ---
 
+## Segredos e variáveis de ambiente
+
+Hoje o Orbit não tem segredos (SQLite local, sem auth, sem chaves externas). Esta seção documenta a **convenção** que vamos seguir quando aparecerem.
+
+### Regras gerais
+1. **Nunca commitar segredos.** O `.gitignore` cobre `.env`, `.env.local` e `.env.*.local`. Se algum escapar, **rotacione o segredo** (gere outro) — apagar do git não basta porque o valor permanece no histórico do repositório.
+2. **Tudo que tiver prefixo `VITE_*` é público.** O Vite injeta essas variáveis no bundle JavaScript que vai para o navegador, então o usuário consegue ver via DevTools. Trate qualquer `VITE_*` como anúncio em outdoor: serve para URLs, feature flags, IDs de analytics públicos. **Nunca para chaves de API, tokens ou senhas.**
+3. **Segredos nunca trafegam pelo frontend.** Se precisar consumir uma API de terceiro com chave secreta, o backend faz a chamada e expõe um endpoint próprio para o front.
+
+### Padrão por stack
+
+| Stack | Em desenvolvimento | Em produção |
+|-------|--------------------|-------------|
+| **.NET (`api/`)** | `dotnet user-secrets` | Variáveis de ambiente do host (Azure App Service, Render, Fly.io) ou cofre (Azure Key Vault, AWS Secrets Manager) |
+| **Vite (`web/`)** | `.env.development` (público, versionado) e `.env.local` (override pessoal, ignorado) | Variáveis injetadas no build, **somente valores públicos** |
+| **Bruno (`bruno/`)** | `bruno/.env` (ignorado), referenciado como `{{process.env.X}}` nos requests | N/A — Bruno é ferramenta de dev |
+
+### Backend: `dotnet user-secrets`
+Quando aparecer um segredo no backend (JWT signing key, connection string de banco remoto, chave de API externa):
+
+```bash
+cd api
+dotnet user-secrets init                           # adiciona um UserSecretsId no csproj
+dotnet user-secrets set "Jwt:Key" "valor-secreto"
+```
+
+Os valores ficam em `~/.microsoft/usersecrets/<id>/secrets.json`, **fora da pasta do projeto** — impossível commitar por acidente. O `IConfiguration` carrega automaticamente em ambiente Development:
+
+```csharp
+var jwtKey = builder.Configuration["Jwt:Key"];
+```
+
+Em produção, o mesmo `IConfiguration` lê de variáveis de ambiente injetadas pelo host (`Jwt__Key=...`).
+
+### Frontend: somente valores públicos
+- **`web/.env.development`** (versionado): defaults de dev. Hoje contém apenas `VITE_API_URL=http://localhost:5121/api`.
+- **`web/.env.local`** (ignorado): override pessoal. Útil se você roda a API noutra porta ou contra outro ambiente.
+- **`web/.env.production`** (versionado, quando existir): defaults de produção, novamente só com valores públicos.
+
+### Exemplo prático futuro
+Quando adicionarmos auth com JWT:
+1. Backend: `dotnet user-secrets set "Jwt:Key" "..."` e ler via `Configuration["Jwt:Key"]`.
+2. Frontend: armazena o token recebido no login (em memória ou `httpOnly` cookie). **Nunca em `VITE_*`** nem em `localStorage` (XSS-vulnerável).
+3. Bruno: `bruno/.env` com `JWT_TOKEN=...`, request usa `Authorization: Bearer {{process.env.JWT_TOKEN}}`.
+
+---
+
 ## Decisões técnicas
 
 ### Minimal API em vez de Controllers
@@ -170,12 +218,12 @@ Cria o schema no startup se ainda não existir. Suficiente para protótipo solo.
 ### SQLite local
 Arquivo único (`api/orbit.db`), zero infraestrutura. Para produção, basta trocar a connection string em `appsettings.json` — EF Core suporta Postgres/SQL Server com mudança mínima de código.
 
-### Estratégia de `.gitignore` por aplicação
-- **Raiz**: apenas regras globais (OS, editores, segredos `.env`).
-- **`api/.gitignore`**: regras .NET (`bin/`, `obj/`, `*.user`, etc.).
-- **`web/.gitignore`**: regras Node/Vite (`node_modules/`, `dist/`, etc.).
+### Estratégia de `.gitignore` consolidado (revisada)
+**Histórico:** começamos com gitignores por aplicação (raiz + `api/` + `web/` + `tests/` + `bruno/`), seguindo a ideia de "co-localizar patterns". Na prática isso falhou duas vezes — `api/bin`/`obj` foram para o primeiro commit (raiz só tinha regras Node) e depois `tests/*/bin`/`obj` foram parar tracked (o `api/.gitignore` não alcança `tests/`). Toda nova pasta de stack obrigava criar mais um gitignore, e patterns como `[Bb]in/` se repetiam entre `api/` e `tests/`.
 
-Patterns ficam co-localizados com o código que os gera. Evita um arquivo gigante na raiz e mantém os patterns específicos do stack restritos à pasta certa.
+**Decisão atual:** um único `.gitignore` na raiz, organizado por seções (`# Sistema operacional`, `# Editores`, `# Segredos`, `# .NET`, `# Node / Vite`, `# Bruno`). Padrões como `[Bb]in/`, `[Oo]bj/` e `node_modules/` casam em qualquer profundidade do repositório, então não importa se a stack aparece em `api/`, `tests/` ou numa pasta nova futura.
+
+**Tradeoff aceito:** patterns deixam de estar co-localizados com o código que os gera, em troca de ter uma fonte única, que não esquece e não tem padrões duplicados. Para um monorepo solo de tamanho moderado, o ganho de confiabilidade compensa.
 
 ### Camadas de teste
 - **Unit tests** (`tests/OrbitApi.UnitTests`): testam os handlers diretamente, com `AppDbContext` usando o provedor `InMemory`. Rápidos, isolam regras de negócio e CRUD.

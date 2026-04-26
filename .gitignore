@@ -1,15 +1,21 @@
-# OS
+# =====================================================
+# Sistema operacional
+# =====================================================
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
 Thumbs.db
 ehthumbs.db
 ehthumbs_vista.db
 $RECYCLE.BIN/
 [Dd]esktop.ini
-.AppleDouble
-.LSOverride
 
-# Editors
+# =====================================================
+# Editores e IDEs
+# =====================================================
 .idea/
+.vs/
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
@@ -22,11 +28,89 @@ $RECYCLE.BIN/
 *.sw?
 *~
 
-# Secrets / env
+# =====================================================
+# Segredos / variáveis de ambiente
+# =====================================================
 .env
 .env.local
 .env.*.local
 
-# Generic logs
+# =====================================================
+# Logs (genéricos)
+# =====================================================
 *.log
 logs/
+
+# =====================================================
+# .NET (api/ + tests/)
+# =====================================================
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+[Bb]uild[Ll]og.*
+[Ll]og/
+[Ll]ogs/
+
+# User-specific
+*.user
+*.userosscache
+*.suo
+*.rsuser
+*.userprefs
+
+# Cache files
+*.[Cc]ache
+!?*.[Cc]ache/
+
+# Build/restore artifacts
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.tlog
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+*.binlog
+
+# Test results / cobertura
+[Tt]est[Rr]esult*/
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+
+# SQLite local DB (gerado pelo EnsureCreated)
+*.db-shm
+*.db-wal
+
+# =====================================================
+# Node / Vite (web/)
+# =====================================================
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# Logs npm/yarn/pnpm
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Coverage do front
+coverage/
+
+# =====================================================
+# Bruno
+# =====================================================
+*.local.bru
